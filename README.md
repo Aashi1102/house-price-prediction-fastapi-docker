@@ -2,14 +2,33 @@
 
 An end-to-end, containerized Machine Learning application that predicts real estate prices based on property features such as square footage, location, year built, and number of rooms. Built to simulate a production-grade ML architecture locally using **MLflow**, **FastAPI**, **Streamlit**, and **Docker Compose** with DNS-based service discovery.
 
-## 🏗️ System Architecture
+## 🏗️ System & Workflow Architecture
 
-```text
-[ Streamlit UI (:8501) ] ──(http://fastapi:8000/predict)──▶ [ FastAPI Service (:8000) ] ──▶ [ XGBoost Model & Preprocessor (.pkl) ]
-                                                                       │
-                                                                       ▼
-                                                            [ MLflow Server (:5555) ]
+The system has two phases: an offline ML training pipeline and an online prediction application.
+
+```mermaid
+flowchart TB
+    subgraph P1["PHASE 1: OFFLINE ML TRAINING PIPELINE · run_pipeline.sh"]
+        direction LR
+        A["Raw Dataset<br/>house_data.csv"] --> B["Data Processing<br/>run_processing.py"]
+        B --> C["Feature Engineering<br/>engineer.py"]
+        C --> D["Model Training<br/>train_model.py<br/>XGBoost Regressor"]
+        D --> E[("Model Artifacts<br/>model.pkl<br/>preprocessor")]
+        D --> F[("MLflow Tracker<br/>Port 5555<br/>Metrics & Runs")]
+    end
+
+    E -->|"Load serialized artifacts"| H
+
+    subgraph P2["PHASE 2: DOCKER COMPOSE PRODUCTION SIMULATION · compose.yaml"]
+        direction LR
+        G["User / Web Browser"] -->|"HTTP"| I["Streamlit UI<br/>Container · 8501"]
+        I -->|"Docker DNS<br/>POST /predict<br/>http://fastapi:8000"| H["FastAPI App<br/>Container · 8000"]
+        H -->|"JSON prediction response"| I
+        I -->|"Results"| G
+    end
 ```
+
+
 
 | Service | Purpose | Tech Stack | Port | Containerized |
 | :--- | :--- | :--- | :--- | :--- |
