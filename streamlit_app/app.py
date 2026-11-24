@@ -11,6 +11,33 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+st.markdown(
+    """
+    <style>
+    /* Blue headings */
+    h1, h2, h3 {
+        color: #1E3A8A !important;
+    }
+
+    /* Solid blue Predict Price button */
+    div.stButton > button {
+        background-color: #1D4ED8;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+    }
+
+    div.stButton > button:hover {
+        background-color: #1E40AF;
+        color: #FFFFFF;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Add title and description
 st.title("House Price Prediction")
 st.markdown(
@@ -166,15 +193,4 @@ with col2:
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Add footer
-st.markdown("<hr>", unsafe_allow_html=True)  # Add a horizontal line for separation
-st.markdown(
-    """
-    <div style="text-align: center; color: gray; margin-top: 20px;">
-        <p><strong>Built for MLOps Bootcamp</strong></p>
-        <p>by <a href="https://www.schoolofdevops.com" target="_blank">School of Devops</a></p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 

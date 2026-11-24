@@ -1,109 +1,137 @@
-# 🧪 Project Spec – Simulate a Production-Grade ML System with Docker Compose
+# 🏠 House Price Predictor — End-to-End ML System with Docker Compose
 
-You are part of an **AI Platform Engineering team** at a tech company that builds internal tools for machine learning, data science, and AI product teams.
+An end-to-end, containerized Machine Learning application that predicts real estate prices based on property features such as square footage, location, year built, and number of rooms. Built to simulate a production-grade ML architecture locally using **MLflow**, **FastAPI**, **Streamlit**, and **Docker Compose** with DNS-based service discovery.
 
-Your mission?
+## 🏗️ System Architecture
 
-> ⚙️ **Assemble a complete, working ML application stack** using Docker Compose to simulate what a real production-grade system looks like — in a local or test environment.
+```text
+[ Streamlit UI (:8501) ] ──(http://fastapi:8000/predict)──▶ [ FastAPI Service (:8000) ] ──▶ [ XGBoost Model & Preprocessor (.pkl) ]
+                                                                       │
+                                                                       ▼
+                                                            [ MLflow Server (:5555) ]
+```
 
-This will be used by:
-
-* **ML Engineers** to validate model APIs
-
-* **AI Engineers** to experiment with pipelines and workflows
-
-* **Data Scientists** to test models end-to-end
-
-* **QA and DevOps teams** to run pre-production validation
-
----
-
-## 🧱 The Use Case
-
-You’re building a **House Price Prediction App** for internal use. The model predicts real estate prices based on features like size, location, and number of rooms. It needs to be:
-
-* Trained reproducibly
-
-* Served through an API
-
-* Visualized through a web UI
-
-* Logged and tracked for every experiment
-
----
-
-## 🛠️ What You’ll Work With
-
-The Dockerfiles are already written. Your job is to **tie everything together** using Docker Compose to create a **reproducible, containerized development environment** that mimics a production system.
-
-|  Component |  Purpose |  Technology |  Container? |
-|---|---|---|---|
-|  Training Pipeline |  Generate model artifacts |  Python Script |  No |
-|  Experiment Tracker |  Log metrics, parameters, models |  MLflow |  ✅ (public image) |
-|  Model API |  Serve predictions via REST |  FastAPI |  ✅ (Dockerfile provided) |
-|  Frontend UI |  Collect input, display predictions |  Streamlit |  ✅ (Dockerfile provided) |
-|  Orchestration |  Tie everything together |  Docker Compose |  ✅ |
----
-
-## 🎯 Your Mission
-
-1. **Run the training pipeline** to generate the model and preprocessor
-
-2. **Use Docker Compose** to define and launch a local ML app stack
-
-3. **Validate service-to-service communication**
-
-4. **Simulate what an integrated ML system looks like before deploying to Kubernetes**
-
-⠀
----
+| Service | Purpose | Tech Stack | Port | Containerized |
+| :--- | :--- | :--- | :--- | :--- |
+| **Training Pipeline** | Data processing, feature engineering & model training | Python (`run_pipeline.sh`) | — | Local script |
+| **Experiment Tracker** | Log parameters, metrics, and model artifacts | MLflow (`ghcr.io/mlflow/mlflow:latest`) | `5555` | ✅ |
+| **Model API** | Serve real-time predictions via REST endpoints | FastAPI (root `Dockerfile`) | `8000` | ✅ |
+| **Frontend UI** | Interactive web interface for price predictions | Streamlit (`streamlit_app/Dockerfile`) | `8501` | ✅ |
+| **Orchestration** | Multi-service networking & DNS service discovery | Docker Compose (`compose.yaml`) | — | ✅ |
 
 ## 📂 Project Structure
 
-```
-house-price-predictor/
-├── run_pipeline.sh                # Generates model artifacts
-├── Dockerfile                     # FastAPI Dockerfile
+```text
+House_Price_Predictor/
+├── assets/
+│   └── streamlit_ui.png            # Screenshot of the Streamlit frontend UI
+├── configs/
+│   └── model_config.yaml           # Model and training configuration
+├── data/
+│   ├── raw/
+│   │   └── house_data.csv          # Raw dataset
+│   └── processed/
+│       ├── cleaned_house_data.csv  # Cleaned dataset
+│       └── featured_house_data.csv # Engineered features dataset
+├── mlflow/
+│   └── docker-compose.yaml         # Standalone MLflow Compose config
+├── models/
+│   └── trained/
+│       ├── house_price_model.pkl   # Serialized trained XGBoost model
+│       └── preprocessor.pkl        # Serialized feature preprocessor
+├── notebooks/
+│   ├── 00_data_engineering.ipynb
+│   ├── 01_exploratory_data_analysis.ipynb
+│   ├── 02_feature_engineering.ipynb
+│   └── 03_experimentation.ipynb
+├── src/
+│   ├── api/
+│   │   ├── main.py                 # FastAPI app & REST endpoints
+│   │   ├── inference.py            # Model loading & prediction logic
+│   │   ├── schemas.py              # Pydantic request/response schemas
+│   │   ├── utils.py                # Helper utilities
+│   │   └── requirements.txt
+│   ├── data/
+│   │   └── run_processing.py       # Data cleaning script
+│   ├── features/
+│   │   └── engineer.py             # Feature engineering script
+│   └── models/
+│       └── train_model.py          # Model training & MLflow logging
 ├── streamlit_app/
-│   ├── Dockerfile                 # Streamlit Dockerfile
-│   └── app.py
-└── docker-compose.yml             # You will create this
+│   ├── .streamlit/config.toml      # Custom light blue & white Streamlit theme
+│   ├── app.py                      # Streamlit frontend application
+│   ├── Dockerfile                  # Streamlit container specification
+│   └── requirements.txt
+├── compose.yaml                    # Multi-service Docker Compose stack
+├── Dockerfile                      # FastAPI container specification
+├── requirements.txt                # Root Python dependencies
+├── run_pipeline.sh                 # End-to-end training pipeline script
+└── LICENSE
 ```
 
----
+## 🔌 Model & API Overview
 
-## 📌 What You’ll Build
+* **Algorithm:** XGBoost Regressor
+* **Prediction Endpoint:** `POST /predict`
+* **Input Features:** Square Footage, Bedrooms, Bathrooms, Location (`Urban`, `Suburban`, `Rural`), and Year Built
+* **Output Returned:** Estimated House Price, Confidence Score, Estimated Price Range, Inference Latency, and Top Factors Affecting Price
 
-Create a `docker-compose.yml` with the following services:
+## 🚀 Getting Started
 
-|  Service |  Build Context/Image |  Port |  Depends On |
-|---|---|---|---|
-|  `mlflow` |  `ghcr.io/mlflow/mlflow:latest` |  5555 |  - |  
-|  `fastapi` |  `.` using root `Dockerfile` |  8000 |  mlflow |  
-|  `streamlit` |  `./streamlit_app` Dockerfile |  8501 |  fastapi |  
-Use DNS-based service discovery: `streamlit` will call `fastapi` via `http://fastapi:8000`.
+### Prerequisites
 
----
+* [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed
+* Python 3.9+ (only if running the training pipeline locally)
 
-## ✅ Final Validation Checklist
+### 1. Clone the Repository
 
-|  Milestone |  Status |
-|---|---|
-|  Model training pipeline runs and saves artifacts |  [ ] |
-|  MLflow UI accessible at [http://localhost:5555](http://localhost:5555/) |  [ ] |  
-|  FastAPI available at [http://localhost:8000/docs](http://localhost:8000/docs) |  [ ] |  
-|  Streamlit available at [http://localhost:8501](http://localhost:8501/) |  [ ] |  
-|  Streamlit fetches predictions from FastAPI successfully |  [ ] |
-|  All services run together with `docker-compose up` |  [ ] |  
----
+```bash
+git clone https://github.com/<your-username>/House_Price_Predictor.git
+cd House_Price_Predictor
+```
 
-## 🚀 What You'll Learn (Real-World MLOps Skills)
+### 2. Run the Training Pipeline (Optional)
 
-* How to simulate production ML systems using containerized services
+Pre-trained artifacts (`house_price_model.pkl` and `preprocessor.pkl`) are included in `models/trained/`. To re-run data processing, feature engineering, and model training from scratch:
 
-* How to tie together training, serving, tracking, and UI in one reproducible dev stack
+```bash
+bash run_pipeline.sh
+```
 
-* How different roles (ML, AI, Data, DevOps, QA) work on the same ML system using Compose
+### 3. Launch the Full Stack with Docker Compose
 
----
+Build and start the **MLflow**, **FastAPI**, and **Streamlit** containers together:
 
+```bash
+docker compose up --build
+```
+
+*(To run in detached/background mode, add `-d`: `docker compose up --build -d`)*
+
+## 🌐 Accessing the Services
+
+Once the containers are running, open these URLs in your browser:
+
+* **Streamlit Frontend UI:** <http://localhost:8501>
+* **FastAPI Interactive Docs (Swagger):** <http://localhost:8000/docs>
+* **MLflow Experiment Tracking UI:** <http://localhost:5555>
+
+> **Internal Networking:** Inside the Docker network, the `streamlit` service communicates with the `fastapi` backend using Docker Compose DNS-based service discovery at `http://fastapi:8000/predict`.
+
+## 🛑 Stopping the Services
+
+```bash
+docker compose down
+```
+
+## 🛠️ Key Concepts Demonstrated
+
+* **Modular ML Pipeline:** Separation of data cleaning, feature engineering, model training, and inference into maintainable Python scripts.
+* **Experiment Tracking:** Automated MLflow server setup for tracking runs, metrics, parameters, and model artifacts.
+* **Model Serving:** Decoupled REST API using FastAPI with Pydantic schema validation.
+* **Containerized Multi-Service Orchestration:** Independent Dockerfiles orchestrated via `compose.yaml` with `depends_on` startup ordering and internal DNS service discovery.
+
+## 📸 Demo
+
+### Streamlit Web UI
+![House Price Predictor Streamlit UI](assets/streamlit_ui.png)

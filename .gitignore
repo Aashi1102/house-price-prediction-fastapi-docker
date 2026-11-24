@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python & Jupyter caches
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# MLflow local runs & databases
+mlflow/mlruns/
+mlflow/mlartifacts/
+*.db
+
+# Environment & IDE files
+.env
+.vscode/
+.DS_Store

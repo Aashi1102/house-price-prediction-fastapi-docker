@@ -1,6 +1,7 @@
 [theme]
-primaryColor = "#A288B3"  # Set the primary color (e.g., slider, buttons)
-backgroundColor = "#F5F5F5"  # Set the background color
-secondaryBackgroundColor = "#FFFFFF"  # Set the sidebar background color
-textColor = "#333333"  # Set the text color
-font = "sans serif"  # Choose a font (e.g., "sans serif", "serif", "monospace")
+base = "light"
+primaryColor = "#1D4ED8"              # Royal blue for sliders, focus borders, and accents
+backgroundColor = "#FFFFFF"           # Clean white main background
+secondaryBackgroundColor = "#EFF6FF"  # Soft ice-blue for dropdowns, inputs, and sidebar
+textColor = "#0F172A"                 # Deep navy-slate for crisp readability
+font = "sans serif"
