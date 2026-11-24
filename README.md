@@ -2,13 +2,9 @@
 
 An end-to-end, containerized Machine Learning application that predicts real estate prices based on property features such as square footage, location, year built, and number of rooms. Built to simulate a production-grade ML architecture locally using **MLflow**, **FastAPI**, **Streamlit**, and **Docker Compose** with DNS-based service discovery.
 
-## 📸 Demo
+## 🏗️ System & Workflow Architecture
 
-### Streamlit Web UI
-![House Price Predictor Streamlit UI](assets/streamlit_ui.png)
-
-🏗️ System & Workflow Architecture
-
+```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
 │                         PHASE 1: OFFLINE ML TRAINING PIPELINE                            │
 │                                   (run_pipeline.sh)                                      │
@@ -38,6 +34,8 @@ An end-to-end, containerized Machine Learning application that predicts real est
 │  └────────────────┘   Results   └───────────────────┘ JSON Response └─────────────────┘  │
 │                                                    (http://fastapi:8000)                 │
 └──────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 
 | Service | Purpose | Tech Stack | Port | Containerized |
 | :--- | :--- | :--- | :--- | :--- |
@@ -158,3 +156,8 @@ docker compose down
 * **Experiment Tracking:** Automated MLflow server setup for tracking runs, metrics, parameters, and model artifacts.
 * **Model Serving:** Decoupled REST API using FastAPI with Pydantic schema validation.
 * **Containerized Multi-Service Orchestration:** Independent Dockerfiles orchestrated via `compose.yaml` with `depends_on` startup ordering and internal DNS service discovery.
+
+## 📸 Demo
+
+### Streamlit Web UI
+![House Price Predictor Streamlit UI](assets/streamlit_ui.png)
