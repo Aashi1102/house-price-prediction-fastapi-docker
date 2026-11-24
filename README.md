@@ -7,14 +7,37 @@ An end-to-end, containerized Machine Learning application that predicts real est
 ### Streamlit Web UI
 ![House Price Predictor Streamlit UI](assets/streamlit_ui.png)
 
-## 🏗️ System Architecture
+🏗️ System & Workflow Architecture
 
-```text
-[ Streamlit UI (:8501) ] ──(http://fastapi:8000/predict)──▶ [ FastAPI Service (:8000) ] ──▶ [ XGBoost Model & Preprocessor (.pkl) ]
-                                                                       │
-                                                                       ▼
-                                                            [ MLflow Server (:5555) ]
-```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                         PHASE 1: OFFLINE ML TRAINING PIPELINE                            │
+│                                   (run_pipeline.sh)                                      │
+│                                                                                          │
+│   ┌────────────────┐     ┌──────────────────┐     ┌───────────────────┐                  │
+│   │  Raw Dataset   │     │ Data Processing  │     │    Feature Eng.   │                  │
+│   │ house_data.csv │────▶│run_processing.py │────▶│    engineer.py    │                  │
+│   └────────────────┘     └──────────────────┘     └─────────┬─────────┘                  │
+│                                                             │                            │
+│                                                             ▼                            │
+│   ┌────────────────┐     ┌──────────────────┐     ┌───────────────────┐                  │
+│   │ MLflow Tracker │     │ Model Artifacts  │     │  Model Training   │                  │
+│   │  (Port :5555)  │◀────│  • model.pkl     │◀────│  train_model.py   │                  │
+│   │ Metrics & Runs │     │  • preprocessor  │     │ XGBoost Regressor │                  │
+│   └────────────────┘     └────────┬─────────┘     └───────────────────┘                  │
+└───────────────────────────────────┼──────────────────────────────────────────────────────┘
+                                    │ Loads Serialized Artifacts
+                                    ▼
+┌───────────────────────────────────┴──────────────────────────────────────────────────────┐
+│                    PHASE 2: DOCKER COMPOSE PRODUCTION SIMULATION                         │
+│                                    (compose.yaml)                                        │
+│                                                                                          │
+│  ┌────────────────┐             ┌───────────────────┐               ┌─────────────────┐  │
+│  │   User / Web   │    HTTP     │   Streamlit UI    │  Docker DNS   │   FastAPI App   │  │
+│  │    Browser     │────────────▶│  Container :8501  │──────────────▶│ Container :8000 │  │
+│  │                │◀────────────│                   │◀──────────────│  POST /predict  │  │
+│  └────────────────┘   Results   └───────────────────┘ JSON Response └─────────────────┘  │
+│                                                    (http://fastapi:8000)                 │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
 
 | Service | Purpose | Tech Stack | Port | Containerized |
 | :--- | :--- | :--- | :--- | :--- |
